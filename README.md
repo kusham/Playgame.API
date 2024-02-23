@@ -28,3 +28,9 @@ dotnet new classlib -n Play.Common --framework net5.0
 ```powershell
 dotnet pack -o ../../../packages
 ```
+
+## Add Nuget package to the Play.Catalog.Service
+```powershell
+dotnet nuget add source F:\.NET\Playgame.API\packages -n Play.Common
+dotnet add package Play.Common
+```
