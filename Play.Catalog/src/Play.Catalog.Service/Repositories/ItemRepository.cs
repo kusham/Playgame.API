@@ -1,22 +1,21 @@
 ﻿using MongoDB.Driver;
 using Play.Catalog.Service.Entities;
+using Play.Catalog.Service.IRepository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Play.Catalog.Service.Repositories
 {
-    public class ItemRepository
+    public class ItemRepository : IItemRepository
     {
         private const string _collectionName = "items";
         private readonly IMongoCollection<Item> _mongoCollection;
         private readonly FilterDefinitionBuilder<Item> _filterBuilder = Builders<Item>.Filter;
 
-        public ItemRepository()
+        public ItemRepository(IMongoDatabase mongoDatabase)
         {
-            var mongoClient = new MongoClient("mongodb://localhost:27017");
-            var database = mongoClient.GetDatabase("Catalog");
-            _mongoCollection = database.GetCollection<Item>(_collectionName);
+            _mongoCollection = mongoDatabase.GetCollection<Item>(_collectionName);
         }
 
         public async Task<IReadOnlyCollection<Item>> GetAllAsync()

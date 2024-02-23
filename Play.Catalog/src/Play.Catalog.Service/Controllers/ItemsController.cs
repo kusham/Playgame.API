@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Play.Catalog.Service.Dtos;
 using Play.Catalog.Service.Entities;
+using Play.Catalog.Service.IRepository;
 using Play.Catalog.Service.Repositories;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,12 @@ namespace Play.Catalog.Service.Controllers
     [Route("items")]
     public class ItemsController : ControllerBase
     {
-        private readonly ItemRepository _itemRepository = new();
+        private readonly IItemRepository _itemRepository;
+
+        public ItemsController(IItemRepository itemRepository)
+        {
+            this._itemRepository = itemRepository;
+        }
 
         //GET /items
         [HttpGet]
