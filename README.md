@@ -7,11 +7,15 @@ dotnet add package MongoDB.Driver
 dotnet add package Microsoft.Extensions.Configuration
 dotnet add package Microsoft.Extensions.Configuration.Binder
 dotnet add package Microsoft.Extensions.DependencyInjection
+dotnet add package Microsoft.Extensions.Http.Polly
 ```
 
 ## Docker For the service
 ```powershell
 docker run -d --rm --name mongo -p 27017:27017 -v mongodbdata:/data/db mongo
+docker compose up
+docker compose down
+docker compose up -d
 ```
 
 ## See what ports are currently in use
