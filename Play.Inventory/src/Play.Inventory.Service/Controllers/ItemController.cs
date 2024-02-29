@@ -15,13 +15,14 @@ namespace Play.Inventory.Service.Controllers
     [Route("items")]
     public class ItemController : ControllerBase
     {
-        private readonly IRepository<InventoryItem> _itemRepository;
-        private readonly CatalogClient _catalogClient;
+        private readonly IRepository<InventoryItem> _inventoryItemRepository;
+        private readonly IRepository<CatalogItem> _catalogItemRepository;
 
-        public ItemController(IRepository<InventoryItem> itemRepository, CatalogClient catalogClient)
+        public ItemController(IRepository<InventoryItem> inventoryItemRepository, 
+            IRepository<CatalogItem> catalogItemRepository)
         {
-            this._itemRepository = itemRepository;
-            this._catalogClient = catalogClient;
+            this._inventoryItemRepository = inventoryItemRepository;
+            this._catalogItemRepository = catalogItemRepository;
         }
         [HttpGet("{userId}")]
         public async Task<ActionResult<IEnumerable<InventoryItemDto>>> GetAsync(Guid userId)
@@ -31,12 +32,13 @@ namespace Play.Inventory.Service.Controllers
                 return BadRequest();
             }
 
-            var catalogItems = await _catalogClient.GetCatalogItemsAsync();
-            var inventoryItemEntities = await _itemRepository.GetAllAsync(item => item.UserId == userId);
+            var inventoryItemEntities = await _inventoryItemRepository.GetAllAsync(item => item.UserId == userId);
+            var itemIds = inventoryItemEntities.Select(item => item.CatalogItemId);
+            var catalogItemsEntities = await _catalogItemRepository.GetAllAsync(item => itemIds.Contains(item.Id));
 
             var inventoryItemDtos = inventoryItemEntities.Select(inventoryItem =>
             {
-                var catalogItem = catalogItems.Single(catalogItem => catalogItem.Id == inventoryItem.CatalogItemId);
+                var catalogItem = catalogItemsEntities.Single(catalogItem => catalogItem.Id == inventoryItem.CatalogItemId);
                 return inventoryItem.AsDto(catalogItem.Name, catalogItem.Description);
             });
             
@@ -45,7 +47,7 @@ namespace Play.Inventory.Service.Controllers
         [HttpPost]
         public async Task<ActionResult> PostAsync (GrantItemDto grantItemsDto)
         {
-            var inventoryItem = await _itemRepository.GetEntityByIdAsync(
+            var inventoryItem = await _inventoryItemRepository.GetEntityByIdAsync(
                 item => item.UserId == grantItemsDto.UserId 
                 && item.CatalogItemId == grantItemsDto.CatalogItemId);
             if (inventoryItem == null)
@@ -58,12 +60,12 @@ namespace Play.Inventory.Service.Controllers
                     AcquiredDate = DateTimeOffset.UtcNow
                 };
 
-                await _itemRepository.CreateEntityAsync(inventoryItem);
+                await _inventoryItemRepository.CreateEntityAsync(inventoryItem);
             }
             else
             {
                 inventoryItem.Quantity += grantItemsDto.Quantity;
-                await _itemRepository.UpdateEntityAsync(inventoryItem);
+                await _inventoryItemRepository.UpdateEntityAsync(inventoryItem);
             }
             return Ok();
         }

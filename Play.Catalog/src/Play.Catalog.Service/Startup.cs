@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Play.Catalog.Service.Entities;
 using Play.Common;
+using Play.Common.MassTransit;
 using Play.Common.Settings;
 
 namespace Play.Catalog.Service
@@ -27,13 +29,8 @@ namespace Play.Catalog.Service
             _serviceSetting = Configuration.GetSection(nameof(ServiceSetting)).Get<ServiceSetting>();
 
             services.AddMongo()
-                .AddMongoRepository<Item>("items");
-
-            services.AddSingleton<IRepository<Item>>(serviceProvider =>
-            {
-                var database = serviceProvider.GetService<IMongoDatabase>();
-                return new MongoRepository<Item>(database, "items");
-            });
+                .AddMongoRepository<Item>("items")
+                .AddMassTransitWithRabbitMq();
 
             services.AddControllers(options =>
             {

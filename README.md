@@ -8,6 +8,8 @@ dotnet add package Microsoft.Extensions.Configuration
 dotnet add package Microsoft.Extensions.Configuration.Binder
 dotnet add package Microsoft.Extensions.DependencyInjection
 dotnet add package Microsoft.Extensions.Http.Polly
+dotnet add package MassTransit.AspNetCore
+dotnet add package MassTransit.RabbitMQ
 ```
 
 ## Docker For the service
@@ -31,10 +33,16 @@ dotnet new classlib -n Play.Common --framework net5.0
 ## Create a Nuget package
 ```powershell
 dotnet pack -o ../../../packages
+dotnet pack -p:PackageVersion=1.0.1 -o ../../../packages
 ```
 
 ## Add Nuget package to the Play.Catalog.Service
 ```powershell
 dotnet nuget add source F:\.NET\Playgame.API\packages -n Play.Common
 dotnet add package Play.Common
+```
+
+## Add refference of a project
+```powershell
+dotnet add reference ..\Play.Catalog.Constract\Play.Catalog.Constract.csproj
 ```
